@@ -32,6 +32,10 @@ func dataSourceAwsEksCluster() *schema.Resource {
 					},
 				},
 			},
+			"identity_oidc_issuer": {
+				Type:     schema.TypeString,
+				Computed: true,
+			},
 			"created_at": {
 				Type:     schema.TypeString,
 				Computed: true,
@@ -127,6 +131,12 @@ func dataSourceAwsEksClusterRead(d *schema.ResourceData, meta interface{}) error
 
 	if err := d.Set("certificate_authority", flattenEksCertificate(cluster.CertificateAuthority)); err != nil {
 		return fmt.Errorf("error setting certificate_authority: %s", err)
+	}
+
+	if cluster.Identity.Oidc.Isser != nil {
+		d.Set("identity_oidc_issuer", cluster.Identity.Oidc.Issuer)
+	} else {
+		d.Set("identity_oidc_issuer", "None")
 	}
 
 	d.Set("created_at", aws.TimeValue(cluster.CreatedAt).String())
